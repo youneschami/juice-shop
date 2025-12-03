@@ -1,5 +1,3 @@
-name: CI — Juice Shop smoke + tests
-
 on:
   push:
     branches: [ "main", "master" ]
@@ -17,38 +15,30 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Start Juice Shop in background
-        # Juice Shop default port is 3000; this runs it detached so subsequent steps can run
         run: |
-          # Start Juice Shop (adapt the command if your fork uses a different script)
           nohup npm start > juice-shop.log 2>&1 & disown
           echo "Started Juice Shop (logs -> juice-shop.log)"
 
-      - name: Wait for server to become ready
-        # Uses wait-on to poll the URL until it responds, with a 60s timeout
-        run: |
-          npx wait-on http://localhost:3000 --timeout 60000
-          echo "Server is responding on http://localhost:3000"
+      - name: Wait for server to be ready
+        run: npx wait-on http://localhost:3000 --timeout 120000
 
-      - name: Smoke test — homepage responds
-        run: |
-          curl -fI http://localhost:3000 | head -n 1
+      - name: Smoke test
+        run: curl -fI http://localhost:3000
 
-      - name: Run repo tests (if any)
-        # Runs whatever test script is defined in package.json (npm test)
+      - name: Run tests (if any)
         run: |
           if npm run | grep -q " test"; then
             npm test
           else
-            echo "No npm test script defined — skipping npm test"
+            echo "No tests found — skipping"
           fi
 
-      - name: Upload server logs on failure
+      - name: Upload server logs if failed
         if: failure()
         uses: actions/upload-artifact@v4
         with:
