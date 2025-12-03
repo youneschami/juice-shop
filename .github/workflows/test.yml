@@ -1,0 +1,84 @@
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: uness777/demo
+jobs:
+  test:
+    name: Test (Node)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Optional build step
+        run: npm run build || echo "no build step"
+
+  build-run-scan:
+    name: Build image → Run app → ZAP Baseline
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image (no push)
+        id: build_image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: false
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.IMAGE_NAME }}:latest
+
+      - name: Run app container
+        run: |
+          # Run the image we just built. Ensure your app listens on 0.0.0.0 and port 3000.
+          docker run -d --name app-under-test -p 3000:3000 ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          # Wait for the app to come up
+          for i in {1..30}; do
+            if curl -sSf http://localhost:3000/ >/dev/null 2>&1; then
+              echo "app is up"
+              break
+            fi
+            echo "waiting for app..."
+            sleep 2
+          done
+
+      - name: Run OWASP ZAP Baseline (action)
+        uses: zaproxy/action-baseline@v0.15.0
+        with:
+          # prefer host.docker.internal so ZAP (container) can reach the app container on the runner host
+          target: "http://host.docker.internal:3000"
+          fail_action: false    # change to true to fail job on alerts
+          cmd_options: "-a"
+        # If this cannot reach the app on your runner, switch to the "docker network" variant below.
+
+      - name: Upload ZAP report
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: zap_report.html
+
+      - name: Cleanup app container
+        if: always()
+        run: docker rm -f app-under-test || true
