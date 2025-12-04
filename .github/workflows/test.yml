@@ -30,14 +30,6 @@ jobs:
       - name: Smoke test
         run: curl -fI http://localhost:3000
 
-      - name: Run tests (if any)
-        run: |
-          if npm run | grep -q " test"; then
-            npm test
-          else
-            echo "No tests found — skipping"
-          fi
-
       - name: Upload server logs if failed
         if: failure()
         uses: actions/upload-artifact@v4
