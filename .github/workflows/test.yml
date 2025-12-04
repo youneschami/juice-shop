@@ -36,19 +36,13 @@ jobs:
         with:
           name: juice-shop-log
           path: juice-shop.log
-
-    
-  Zap-scan:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+        
       - name: run ZAP baseline scan
         uses: zaproxy/action-baseline@v0.15.0
         with:
           target: "http://localhost:3000"
           fail_action: false
           cmd_options: "-a"
+
+    
       
