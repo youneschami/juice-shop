@@ -30,19 +30,13 @@ jobs:
       - name: Smoke test
         run: curl -fI http://localhost:3000
 
-      - name: Upload server logs if failed
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: juice-shop-log
-          path: juice-shop.log
         
       - name: run ZAP baseline scan
         uses: zaproxy/action-baseline@v0.15.0
         with:
           target: "http://localhost:3000"
           fail_action: false
-          cmd_options: "-a"
+          cmd_options: "-a -j"
 
       - name: run Zap full scan
         uses: zaproxy/action-full-scan@v0.13.0
