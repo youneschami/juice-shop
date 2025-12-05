@@ -1,0 +1,4 @@
+on:
+  schedule:
+    - cron: "0 0 * * *"   #  1 AM Morocco
+  workflow_dispatch: {}    
