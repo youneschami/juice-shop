@@ -10,34 +10,30 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
+       #-------Build-Test-Website-------#
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "24"
-
       - name: Install dependencies
         run: npm install
-
       - name: Start Juice Shop in background
         run: |
           nohup npm start > juice-shop.log 2>&1 & disown
           echo "Started Juice Shop (logs -> juice-shop.log)"
-
       - name: Wait for server to be ready
         run: npx wait-on http://localhost:3000 --timeout 120000
-
       - name: Smoke test
         run: curl -fI http://localhost:3000
 
-        
+        #-------Baseline-Zap-Scan-------# 
       - name: run ZAP baseline scan
         uses: zaproxy/action-baseline@v0.15.0
         with:
           target: "http://localhost:3000"
           fail_action: false
           cmd_options: "-a -j"
-
+        #-------Full-Zap-Scan-------#
       - name: run Zap full scan
         uses: zaproxy/action-full-scan@v0.13.0
         with:
