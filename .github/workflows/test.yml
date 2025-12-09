@@ -26,7 +26,13 @@ jobs:
         run: npx wait-on http://localhost:3000 --timeout 120000
       - name: Smoke test
         run: curl -fI http://localhost:3000
-
+        
+       #-------Nikto scan-------# 
+      - name: Run Nikto on target
+        uses: thereisnotime/Action-nikto@4f5e0355a557f7089a8e12c5f068d7d9dc965ed5
+        with:
+         url: "http://localhost:3000"
+         
         #-------Baseline-Zap-Scan-------# 
       - name: run ZAP baseline scan
         uses: zaproxy/action-baseline@v0.15.0
@@ -34,6 +40,7 @@ jobs:
           target: "http://localhost:3000"
           fail_action: false
           cmd_options: "-a -j"
+          
         #-------Full-Zap-Scan-------#
       - name: run Zap full scan
         uses: zaproxy/action-full-scan@v0.13.0
