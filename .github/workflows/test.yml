@@ -29,9 +29,15 @@ jobs:
         
        #-------Nikto scan-------# 
       - name: Run Nikto on target
-        uses: thereisnotime/Action-nikto@4f5e0355a557f7089a8e12c5f068d7d9dc965ed5
-        with:
-         url: "http://localhost:3000"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nikto
+          nikto -h http://localhost:3000
+          
+          
+        #uses: thereisnotime/Action-nikto@4f5e0355a557f7089a8e12c5f068d7d9dc965ed5
+        #with:
+        # url: "http://localhost:3000"
          
         #-------Baseline-Zap-Scan-------# 
       - name: run ZAP baseline scan
