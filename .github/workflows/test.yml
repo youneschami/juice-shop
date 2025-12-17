@@ -45,13 +45,16 @@ jobs:
         with:
           target: "http://localhost:3000"
           fail_action: false
-          cmd_options: "-a -j"
-          json_report: true
+          cmd_options: >
+            -a
+            -j
+            -J zap_report.json
 
 
         #-------Summary in Run-------# 
       - name: ZAP Alert Summary
         run: | 
+         ls -lah
          echo "## 🔐 OWASP ZAP Scan Summary" >> $GITHUB_STEP_SUMMARY
          HIGH=$(jq '[.site[].alerts[] | select(.riskcode == "3")] | length' zap_report.json)
          MEDIUM=$(jq '[.site[].alerts[] | select(.riskcode == "2")] | length' zap_report.json)
