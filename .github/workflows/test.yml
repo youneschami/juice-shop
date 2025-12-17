@@ -55,7 +55,7 @@ jobs:
         #-------Summary in Run-------# 
       - name: ZAP Alert Summary
         run: | 
-         echo "##  OWASP ZAP Scan Summary" >> $GITHUB_STEP_SUMMARY
+         echo "##  OWASP ZAP Baseline Scan Summary" >> $GITHUB_STEP_SUMMARY
          HIGH=$(jq '[.site[].alerts[] | select(.riskcode == "3")] | length' zap_report.json)
          MEDIUM=$(jq '[.site[].alerts[] | select(.riskcode == "2")] | length' zap_report.json)
          LOW=$(jq '[.site[].alerts[] | select(.riskcode == "1")] | length' zap_report.json)
@@ -76,13 +76,14 @@ jobs:
           fail_action: false
           cmd_options: > 
             -a 
+            -j
             -J full_report.json
           artifact_name: "full-scan"
 
        #-------Summary in Run-------# 
       - name: full ZAP Alert Summary
         run: | 
-         echo "##  OWASP ZAP Scan Summary" >> $GITHUB_STEP_SUMMARY
+         echo "##  OWASP ZAP Full Scan Summary" >> $GITHUB_STEP_SUMMARY
          HIGH=$(jq '[.site[].alerts[] | select(.riskcode == "3")] | length' full_report.json)
          MEDIUM=$(jq '[.site[].alerts[] | select(.riskcode == "2")] | length' full_report.json)
          LOW=$(jq '[.site[].alerts[] | select(.riskcode == "1")] | length' full_report.json)
