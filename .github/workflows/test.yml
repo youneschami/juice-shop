@@ -48,8 +48,16 @@ jobs:
           cmd_options: >
             -a
             -j
-            -J zap_report.json
-          artifact_name: "baseline-scan"
+            -J zap_report.json     
+            
+      - name: Upload ZAP Baseline Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+            name: zap-baseline-scan
+            path: |
+              zap_report.json
+              zap_report.html
 
 
         #-------Summary in Run-------# 
@@ -79,6 +87,16 @@ jobs:
             -j
             -J full_report.json
           artifact_name: "full-scan"
+
+      - name: Upload ZAP full Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+            name: zap-full-scan
+            path: |
+              full_report.json
+              zap_full_report.html
+
 
        #-------Summary in Run-------# 
       - name: full ZAP Alert Summary
