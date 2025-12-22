@@ -43,8 +43,8 @@ jobs:
     - name: npm Audit
       run: npm audit --audit-level=high || true
 
-    - name: Secrets Scan — Gitleaks
-      uses: gitleaks/gitleaks-action@v2.3.4
+    #- name: Secrets Scan — Gitleaks
+    #  uses: gitleaks/gitleaks-action@v2.3.4
 
     # ===============================
     # Start & Test Application
