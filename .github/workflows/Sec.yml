@@ -1,6 +1,9 @@
 name: Automated Pentest CI
 
 on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -38,7 +41,7 @@ jobs:
     # ===============================
 
     - name: npm Audit
-      run: npm audit --audit-level=high
+      run: npm audit
 
     - name: Secrets Scan — Gitleaks
       uses: gitleaks/gitleaks-action@v2.3.4
