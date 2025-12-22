@@ -94,6 +94,7 @@ jobs:
           path: |
             zap_report.json
             zap_report.html
+            
      #-------Summary in Run-------# 
     - name: ZAP Alert Summary
       run: | 
@@ -102,6 +103,45 @@ jobs:
          MEDIUM=$(jq '[.site[].alerts[] | select(.riskcode == "2")] | length' zap_report.json)
          LOW=$(jq '[.site[].alerts[] | select(.riskcode == "1")] | length' zap_report.json)
          INFO=$(jq '[.site[].alerts[] | select(.riskcode == "0")] | length' zap_report.json)
+         
+         echo "|  Severity | Count |" >> $GITHUB_STEP_SUMMARY
+         echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+         echo "| 🔴 High   | $HIGH |" >> $GITHUB_STEP_SUMMARY
+         echo "| 🟠 Medium | $MEDIUM |" >> $GITHUB_STEP_SUMMARY
+         echo "| 🟡 Low    | $LOW |" >> $GITHUB_STEP_SUMMARY
+         echo "| 🔵 Info   | $INFO |" >> $GITHUB_STEP_SUMMARY
+
+      #-------Full scan-------#
+
+    - name: run Zap full scan
+      uses: zaproxy/action-full-scan@v0.13.0
+      with:
+          target: "http://localhost:3000"
+          fail_action: false
+          cmd_options: > 
+            -a 
+            -j
+            -J full_report.json
+          artifact_name: "full-scan"
+
+    - name: Upload ZAP full Reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+            name: zap-full-scan
+            path: |
+              full_report.json
+              zap_full_report.html
+
+
+       #-------Summary in Run-------# 
+    - name: full ZAP Alert Summary
+      run: | 
+         echo "##  OWASP ZAP Full Scan Summary" >> $GITHUB_STEP_SUMMARY
+         HIGH=$(jq '[.site[].alerts[] | select(.riskcode == "3")] | length' full_report.json)
+         MEDIUM=$(jq '[.site[].alerts[] | select(.riskcode == "2")] | length' full_report.json)
+         LOW=$(jq '[.site[].alerts[] | select(.riskcode == "1")] | length' full_report.json)
+         INFO=$(jq '[.site[].alerts[] | select(.riskcode == "0")] | length' full_report.json)
          
          echo "|  Severity | Count |" >> $GITHUB_STEP_SUMMARY
          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
