@@ -1,0 +1,59 @@
+name: Automated Pentest CI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # ===============================
+    # Checkout & Setup
+    # ===============================
+    - name: Checkout repo
+      uses: actions/checkout@v6
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: "20"
+
+    # ===============================
+    # CodeQL (SAST)
+    # ===============================
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v4
+      with:
+        languages: javascript
+
+    - name: Install dependencies (CodeQL build)
+      run: npm install
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v4
+
+    # ===============================
+    # Supply-Chain Security
+    # ===============================
+    - name: Dependency Review
+      uses: actions/dependency-review-action@v4.8.2
+
+    - name: npm Audit
+      run: npm audit --audit-level=high
+
+    - name: Secrets Scan — Gitleaks
+      uses: gitleaks/gitleaks-action@v2.3.4
+
+    # ===============================
+    # Start & Test Application
+    # ===============================
+    - name: Start Juice Shop
+      run: |
+        nohup npm start > juice-shop.log 2>&1 & disown
+
+    - name: Wait for server
+      run: npx wait-on http://localhost:3000 --timeout 120000
+
+    - name: Smoke test
+      run: curl -fI http://localhost:3000
