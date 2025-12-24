@@ -20,7 +20,31 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v6
       with:
-        node-version: "20"
+        node-version: "24"
+
+    # ===============================
+    # Cache npm dependencies
+    # ===============================
+    - name: Cache npm
+      uses: actions/cache@v5
+      with:
+        path: |
+          ~/.npm
+          node_modules
+        key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-npm-
+
+    # ===============================
+    # Cache CodeQL database
+    # ===============================
+    - name: Cache CodeQL
+      uses: actions/cache@v5
+      with:
+        path: ~/.cache/codeql
+        key: ${{ runner.os }}-codeql-${{ github.ref }}
+        restore-keys: |
+          ${{ runner.os }}-codeql-
 
     # ===============================
     # CodeQL (SAST)
@@ -73,9 +97,20 @@ jobs:
           name: nikto_scan
           path: |
            nikto_scan.txt
-           
-    #--Nuclei-scan--#
- 
+
+    # ===============================
+    # Cache Nuclei templates
+    # ===============================
+    - name: Cache Nuclei templates
+      uses: actions/cache@v5
+      with:
+        path: ~/.nuclei
+        key: ${{ runner.os }}-nuclei-templates
+
+    # ===============================
+    # Nuclei
+    # ===============================
+    
     - name: Run Nuclei scan
       uses: projectdiscovery/nuclei-action@main
       with:
@@ -89,7 +124,10 @@ jobs:
         name: nuclei-scan
         path: nuclei_report.json
            
-    #--ZAP-scan--#
+    
+    # ===============================
+    # ZAP Baseline
+    # ===============================
     
     - name: run ZAP baseline scan
       uses: zaproxy/action-baseline@v0.15.0
@@ -126,7 +164,10 @@ jobs:
          echo "| 🟡 Low    | $LOW |" >> $GITHUB_STEP_SUMMARY
          echo "| 🔵 Info   | $INFO |" >> $GITHUB_STEP_SUMMARY
 
-      #-------Full scan-------#
+     
+    # ===============================
+    # ZAP Full scan
+    # ===============================
 
     - name: run Zap full scan
       uses: zaproxy/action-full-scan@v0.13.0
