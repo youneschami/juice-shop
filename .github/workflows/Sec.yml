@@ -88,21 +88,6 @@ jobs:
       with:
         name: nuclei-scan
         path: nuclei_report.json
-
-    - name: Nuclei Summary
-      run: |
-        echo "## 🧬 Nuclei Scan Summary" >> $GITHUB_STEP_SUMMARY
-        CRITICAL=$(jq '[.[] | select(.severity=="critical")] | length' nuclei_report.json)
-        HIGH=$(jq '[.[] | select(.severity=="high")] | length' nuclei_report.json)
-        MEDIUM=$(jq '[.[] | select(.severity=="medium")] | length' nuclei_report.json)
-        LOW=$(jq '[.[] | select(.severity=="low")] | length' nuclei_report.json)
-
-        echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
-        echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
-        echo "| 🔴 Critical | $CRITICAL |" >> $GITHUB_STEP_SUMMARY
-        echo "| 🔴 High | $HIGH |" >> $GITHUB_STEP_SUMMARY
-        echo "| 🟠 Medium | $MEDIUM |" >> $GITHUB_STEP_SUMMARY
-        echo "| 🟡 Low | $LOW |" >> $GITHUB_STEP_SUMMARY
            
     #--ZAP-scan--#
     
