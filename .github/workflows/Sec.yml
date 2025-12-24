@@ -77,7 +77,7 @@ jobs:
     #--Nuclei-scan--#
  
     - name: Run Nuclei scan
-      uses: projectdiscovery/nuclei-action@v3
+      uses: projectdiscovery/nuclei-action@main
       with:
         target: http://localhost:3000
         output: nuclei_report.json
