@@ -21,30 +21,7 @@ jobs:
       uses: actions/setup-node@v6
       with:
         node-version: "24"
-
-    # ===============================
-    # Cache npm dependencies
-    # ===============================
-    - name: Cache npm
-      uses: actions/cache@v5
-      with:
-        path: |
-          ~/.npm
-          node_modules
-        key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-npm-
-
-    # ===============================
-    # Cache CodeQL database
-    # ===============================
-    - name: Cache CodeQL
-      uses: actions/cache@v5
-      with:
-        path: ~/.cache/codeql
-        key: ${{ runner.os }}-codeql-${{ github.ref }}
-        restore-keys: |
-          ${{ runner.os }}-codeql-
+        cache: npm
 
     # ===============================
     # CodeQL (SAST)
