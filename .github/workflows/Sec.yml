@@ -81,7 +81,6 @@ jobs:
       with:
         target: http://localhost:3000
         output: nuclei_report.json
-        json: true
 
     - name: Upload Nuclei report
       if: always()
