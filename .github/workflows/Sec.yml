@@ -41,7 +41,7 @@ jobs:
     # ===============================
 
     - name: npm Audit
-      run: npm audit --audit-level=high || true
+      run: npm audit --audit-level=high || true # continue the scan even if high or critical alerts were found
 
     #- name: Secrets Scan — Gitleaks
     #  uses: gitleaks/gitleaks-action@v2.3.4
@@ -59,7 +59,7 @@ jobs:
     - name: Smoke test
       run: curl -fI http://localhost:3000
     # ===============================
-    # DAST (ZAP / Nikto)
+    # DAST (ZAP / Nikto / Nuclei)
     # ===============================
     - name: Run Nikto on target
       run: |
@@ -73,6 +73,37 @@ jobs:
           name: nikto_scan
           path: |
            nikto_scan.txt
+           
+    #--Nuclei-scan--#
+ 
+    - name: Run Nuclei scan
+      uses: projectdiscovery/nuclei-action@v3
+      with:
+        target: http://localhost:3000
+        output: nuclei_report.json
+        json: true
+
+    - name: Upload Nuclei report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuclei-scan
+        path: nuclei_report.json
+
+    - name: Nuclei Summary
+      run: |
+        echo "## 🧬 Nuclei Scan Summary" >> $GITHUB_STEP_SUMMARY
+        CRITICAL=$(jq '[.[] | select(.severity=="critical")] | length' nuclei_report.json)
+        HIGH=$(jq '[.[] | select(.severity=="high")] | length' nuclei_report.json)
+        MEDIUM=$(jq '[.[] | select(.severity=="medium")] | length' nuclei_report.json)
+        LOW=$(jq '[.[] | select(.severity=="low")] | length' nuclei_report.json)
+
+        echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+        echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| 🔴 Critical | $CRITICAL |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🔴 High | $HIGH |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🟠 Medium | $MEDIUM |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🟡 Low | $LOW |" >> $GITHUB_STEP_SUMMARY
            
     #--ZAP-scan--#
     
@@ -131,7 +162,7 @@ jobs:
             name: zap-full-scan
             path: |
               full_report.json
-              zap_full_report.html
+              full_report.html
 
 
        #-------Summary in Run-------# 
