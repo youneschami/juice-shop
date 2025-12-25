@@ -1,6 +1,7 @@
 name: Full Nightly Pentest CI
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "25 12 * * *"    # runs every day at midnight UTC
 
