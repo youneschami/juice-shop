@@ -1,9 +1,6 @@
 name: Automated Pentest CI
 
 on:
-  push:
-    branches: [ "main", "master" ]
-  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -39,6 +36,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: |
+            ~/.npm
             **/node_modules
         key: ${{ runner.os }}-node-${{ steps.node.outputs.version }}-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
@@ -89,16 +87,6 @@ jobs:
           path: |
            nikto_scan.txt
 
-    # ===============================
-    # Cache Nuclei templates
-    # ===============================
-    - name: Cache Nuclei templates
-      uses: actions/cache@v5
-      with:
-        path: ~/.nuclei
-        key: ${{ runner.os }}-nuclei-templates
-
-    
     # ===============================
     # ZAP Baseline
     # ===============================
