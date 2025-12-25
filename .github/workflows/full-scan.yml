@@ -3,31 +3,28 @@ name: Full Nightly Pentest CI
 on:
   workflow_dispatch:
   schedule:
-    - cron: "25 12 * * *"    # runs every day at midnight UTC
+    - cron: "0 0 * * *"    # runs every day at midnight UTC
 
 jobs:
   run-if-pr-exists:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Check for open PRs to main
-        id: check_pr
+      - uses: actions/checkout@v4
+
+      - name: Fail if no PRs
         uses: actions/github-script@v7
         with:
           script: |
-            const { data: prs } = await github.rest.pulls.list({
+            const prs = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: "open",
-              base: "main"
             });
-            core.setOutput("pr_count", prs.length);
 
-      - name: Stop if no PRs
-        if: steps.check_pr.outputs.pr_count == '0'
-        run: |
-          echo "No open PRs targeting main. Exiting."
-          exit 0  
+            if (prs.data.length === 0) {
+              core.setFailed("No PRs found. Workflow failed.");
+            }
 
 
   build-and-test:
@@ -53,7 +50,20 @@ jobs:
       with:
         languages: javascript
 
-    - name: Install dependencies (CodeQL build)
+    - name: Get Node version
+      id: node
+      run: |
+        echo "version=$(node -v)" >> $GITHUB_OUTPUT
+    - name: Cache node_modules
+      uses: actions/cache@v3
+      with:
+        path: |
+            ~/.npm
+            **/node_modules
+        key: ${{ runner.os }}-node-${{ steps.node.outputs.version }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - name: Install dependencies
       run: npm install
 
     - name: Perform CodeQL Analysis
@@ -96,15 +106,6 @@ jobs:
           name: nikto_scan
           path: |
            nikto_scan.txt
-
-    # ===============================
-    # Cache Nuclei templates
-    # ===============================
-    - name: Cache Nuclei templates
-      uses: actions/cache@v5
-      with:
-        path: ~/.nuclei
-        key: ${{ runner.os }}-nuclei-templates
 
     # ===============================
     # Nuclei
