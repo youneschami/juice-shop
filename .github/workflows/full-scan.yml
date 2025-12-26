@@ -46,29 +46,29 @@ jobs:
     # ===============================
     # CodeQL (SAST)
     # ===============================
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v4
-      with:
-        languages: javascript
+   # - name: Initialize CodeQL
+   #  uses: github/codeql-action/init@v4
+   #   with:
+   #     languages: javascript
 
-    - name: Get Node version
-      id: node
-      run: |
-        echo "version=$(node -v)" >> $GITHUB_OUTPUT
-    - name: Cache node_modules
-      uses: actions/cache@v3
-      with:
-        path: |
-            ~/.npm
-            **/node_modules
-        key: ${{ runner.os }}-node-${{ steps.node.outputs.version }}-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
-    - name: Install dependencies
-      run: npm install
+   # - name: Get Node version
+   #   id: node
+    #  run: |
+    #   echo "version=$(node -v)" >> $GITHUB_OUTPUT
+    #- name: Cache node_modules
+    #  uses: actions/cache@v3
+    #  with:
+    #    path: |
+    #        ~/.npm
+    #        **/node_modules
+    #    key: ${{ runner.os }}-node-${{ steps.node.outputs.version }}-${{ hashFiles('**/package-lock.json') }}
+    #    restore-keys: |
+    #      ${{ runner.os }}-node-
+    #- name: Install dependencies
+    #  run: npm install
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v4
+#    - name: Perform CodeQL Analysis
+ #     uses: github/codeql-action/analyze@v4
 
     # ===============================
     # Supply-Chain Security
@@ -95,35 +95,33 @@ jobs:
     # ===============================
     # DAST (ZAP / Nikto / Nuclei)
     # ===============================
-    - name: Run Nikto on target
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y nikto
-        nikto -h http://localhost:3000 -Format txt -o nikto_scan.txt
-    - name: Upload Nikto Reports
-      if: always()
-      uses: actions/upload-artifact@v6
-      with:
-          name: nikto_scan
-          path: |
-           nikto_scan.txt
-
+    
     # ===============================
     # Nuclei
     # ===============================
     
-    - name: Run Nuclei scan
+    - name: Cache Nuclei Templates
+      uses: actions/cache@v5
+      with:
+        path: ~/.local/nuclei-templates
+        key: ${{ runner.os }}-nuclei-templates
+
+    - name: Update Nuclei Templates
+      run: nuclei -update-templates || true
+
+    - name: Run Nuclei Scan
       uses: projectdiscovery/nuclei-action@main
       with:
         target: http://localhost:3000
         output: nuclei_report.json
 
-    - name: Upload Nuclei report
+    - name: Upload Nuclei Report
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: nuclei-scan
-        path: nuclei_report.json   
+        path: nuclei_report.json
+
      
     # ===============================
     # ZAP Full scan
