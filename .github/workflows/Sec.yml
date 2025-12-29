@@ -71,24 +71,7 @@ jobs:
     - name: Smoke test
       run: curl -fI http://localhost:3000
     # ===============================
-    # DAST (ZAP / Nikto / Nuclei)
-    # ===============================
-    - name: Run Nikto on target
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y nikto
-        nikto -h http://localhost:3000 -Format txt -o nikto_scan.txt
-        
-    - name: Upload Nikto Reports
-      if: always()
-      uses: actions/upload-artifact@v6
-      with:
-          name: nikto_scan
-          path: |
-           nikto_scan.txt
-
-    # ===============================
-    # ZAP Baseline
+    # DAST ZAP Baseline
     # ===============================
     
     - name: run ZAP baseline scan
