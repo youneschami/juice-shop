@@ -99,20 +99,21 @@ jobs:
     # ===============================
     # Nuclei
     # ===============================
+    - name: Ensure Nuclei templates directory exists
+      run: mkdir -p /home/runner/nuclei-templates
+
     - name: Cache Nuclei Templates
       uses: actions/cache@v5
       with:
-        path: /home/runner/nuclei-templatesv1
-        key: ${{ runner.os }}-nuclei-templates-
-        restore-keys: |
-          ${{ runner.os }}-nuclei-templates-
+        path: /home/runner/nuclei-templates
+        key: ${{ runner.os }}-nuclei-templates 
 
     - name: Run Nuclei Scan
       uses: projectdiscovery/nuclei-action@main
       with:
         target: http://localhost:3000
         output: nuclei_report.json
-        
+
     - name: Upload Nuclei Report
       if: always()
       uses: actions/upload-artifact@v4
