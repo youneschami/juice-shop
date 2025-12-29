@@ -99,6 +99,13 @@ jobs:
     # ===============================
     # Nuclei
     # ===============================
+    - name: Cache Nuclei Templates
+      uses: actions/cache@v5
+      with:
+        path: /home/runner/nuclei-templates
+        key: ${{ runner.os }}-nuclei-templates-
+        restore-keys: |
+          ${{ runner.os }}-nuclei-templates-
 
     - name: Run Nuclei Scan
       uses: projectdiscovery/nuclei-action@main
@@ -106,13 +113,6 @@ jobs:
         target: http://localhost:3000
         output: nuclei_report.json
         
-    - name: Cache Nuclei Templates
-      uses: actions/cache@v5
-      with:
-        path: ~/.nuclei
-        key: ${{ runner.os }}-nuclei-templates
-        
-
     - name: Upload Nuclei Report
       if: always()
       uses: actions/upload-artifact@v4
