@@ -51,19 +51,19 @@ jobs:
    #   with:
    #     languages: javascript
 
-   # - name: Get Node version
-   #   id: node
-    #  run: |
-    #   echo "version=$(node -v)" >> $GITHUB_OUTPUT
-    #- name: Cache node_modules
-    #  uses: actions/cache@v3
-    #  with:
-    #    path: |
-    #        ~/.npm
-    #        **/node_modules
-    #    key: ${{ runner.os }}-node-${{ steps.node.outputs.version }}-${{ hashFiles('**/package-lock.json') }}
-    #    restore-keys: |
-    #      ${{ runner.os }}-node-
+    - name: Get Node version
+      id: node
+      run: |
+       echo "version=$(node -v)" >> $GITHUB_OUTPUT
+    - name: Cache node_modules
+      uses: actions/cache@v3
+      with:
+        path: |
+            ~/.npm
+            **/node_modules
+        key: ${{ runner.os }}-node-${{ steps.node.outputs.version }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
     - name: Install dependencies
       run: npm install
 
@@ -99,21 +99,19 @@ jobs:
     # ===============================
     # Nuclei
     # ===============================
-    
-    - name: Cache Nuclei Templates
-      uses: actions/cache@v5
-      with:
-        path: ~/.local/nuclei-templates
-        key: ${{ runner.os }}-nuclei-templates
-
-    - name: Update Nuclei Templates
-      run: nuclei -update-templates || true
 
     - name: Run Nuclei Scan
       uses: projectdiscovery/nuclei-action@main
       with:
         target: http://localhost:3000
         output: nuclei_report.json
+        
+    - name: Cache Nuclei Templates
+      uses: actions/cache@v5
+      with:
+        path: ~/.nuclei
+        key: ${{ runner.os }}-nuclei-templates
+        
 
     - name: Upload Nuclei Report
       if: always()
@@ -129,20 +127,6 @@ jobs:
     
 
        #-------Summary in Run-------# 
-    - name: full ZAP Alert Summary
-      run: | 
-         echo "##  OWASP ZAP Full Scan Summary" >> $GITHUB_STEP_SUMMARY
-         HIGH=$(jq '[.site[].alerts[] | select(.riskcode == "3")] | length' full_report.json)
-         MEDIUM=$(jq '[.site[].alerts[] | select(.riskcode == "2")] | length' full_report.json)
-         LOW=$(jq '[.site[].alerts[] | select(.riskcode == "1")] | length' full_report.json)
-         INFO=$(jq '[.site[].alerts[] | select(.riskcode == "0")] | length' full_report.json)
-         
-         echo "|  Severity | Count |" >> $GITHUB_STEP_SUMMARY
-         echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
-         echo "| 🔴 High   | $HIGH |" >> $GITHUB_STEP_SUMMARY
-         echo "| 🟠 Medium | $MEDIUM |" >> $GITHUB_STEP_SUMMARY
-         echo "| 🟡 Low    | $LOW |" >> $GITHUB_STEP_SUMMARY
-         echo "| 🔵 Info   | $INFO |" >> $GITHUB_STEP_SUMMARY
-      
+  
 
           
