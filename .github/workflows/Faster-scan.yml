@@ -128,12 +128,16 @@ jobs:
     
     steps:
     # ===============================
-    # Setup
+    # Checkout & Setup
     # ===============================
+    - name: Checkout repo
+      uses: actions/checkout@v6
+
     - name: Setup Node.js
       uses: actions/setup-node@v6
       with:
         node-version: "24"
+        
     - name: Get Node version
       id: node
       run: |
@@ -147,6 +151,7 @@ jobs:
         key: ${{ runner.os }}-node-${{ steps.node.outputs.version }}-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
+          
     - name: Install dependencies
       run: npm install
       
