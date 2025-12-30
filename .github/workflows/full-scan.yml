@@ -6,25 +6,25 @@ on:
     - cron: "0 0 * * *"    # runs every day at midnight UTC
 
 jobs:
-  run-if-pr-exists:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - uses: actions/checkout@v4
+ # run-if-pr-exists:
+ #   runs-on: ubuntu-latest
+ #   
+ #   steps:
+ #     - uses: actions/checkout@v4
 
-      - name: Fail if no PRs
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const prs = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: "open",
-            });
+ #     - name: Fail if no PRs
+ #       uses: actions/github-script@v7
+ #       with:
+ #         script: |
+ #           const prs = await github.rest.pulls.list({
+ #             owner: context.repo.owner,
+ #             repo: context.repo.repo,
+ #             state: "open",
+ #           });
 
-            if (prs.data.length === 0) {
-              core.setFailed("No PRs found. Workflow failed.");
-            }
+  #          if (prs.data.length === 0) {
+  #            core.setFailed("No PRs found. Workflow failed.");
+  #          }
 
 
   build-and-test:
