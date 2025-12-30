@@ -1,4 +1,4 @@
-name: Automated Pentest CI
+name: Automated Pentest CI V2
 
 on:
   workflow_dispatch:
@@ -71,6 +71,21 @@ jobs:
       uses: actions/setup-node@v6
       with:
         node-version: "24"
+
+    - name: Get Node version
+      id: node
+      run: |
+        echo "version=$(node -v)" >> $GITHUB_OUTPUT
+
+    - name: Cache node_modules
+      uses: actions/cache@v3
+      with:
+        path: |
+            ~/.npm
+            **/node_modules
+        key: ${{ runner.os }}-node-${{ steps.node.outputs.version }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
         
     - name: Install dependencies
       run: npm install
