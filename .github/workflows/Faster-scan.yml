@@ -3,28 +3,28 @@ name: Full Nightly Pentest CI V2
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *"    # runs every day at midnight UTC
+    - cron: "0 23 * * *"    # runs every day at midnight UTC
 
 jobs:
-  run-if-pr-exists:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - uses: actions/checkout@v4
+ # run-if-pr-exists:
+ #   runs-on: ubuntu-latest
+ #   
+ #   steps:
+ #     - uses: actions/checkout@v4
 
-      - name: Fail if no PRs
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const prs = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: "open",
-            });
+ #     - name: Fail if no PRs
+ #       uses: actions/github-script@v7
+ #       with:
+ #         script: |
+ #           const prs = await github.rest.pulls.list({
+ #             owner: context.repo.owner,
+ #             repo: context.repo.repo,
+ #             state: "open",
+ #           });
 
-            if (prs.data.length === 0) {
-              core.setFailed("No PRs found. Workflow failed.");
-            }
+ #           if (prs.data.length === 0) {
+ #             core.setFailed("No PRs found. Workflow failed.");
+ #           }
 
 
   build-and-test:
@@ -73,7 +73,7 @@ jobs:
     # ===============================
     # Supply-Chain Security
     # ===============================
-
+      # scans project's dependencies (listed in package.json) for known security vulnerabilities.
     - name: npm Audit
       run: npm audit --audit-level=high || true # continue the scan even if high or critical alerts were found
 
@@ -93,7 +93,7 @@ jobs:
     - name: Smoke test
       run: curl -fI http://localhost:3000
     # ===============================
-    # DAST (ZAP / Nikto / Nuclei)
+    # DAST ( Nikto / Nuclei)
     # ===============================
     - name: Run Nikto on target
       run: |
@@ -122,6 +122,7 @@ jobs:
       with:
         name: nuclei-scan
         path: nuclei_report.json
+
 
   Zap-Full-Scan:
     runs-on: ubuntu-latest
